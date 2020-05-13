@@ -8,6 +8,8 @@ import matplotlib.image as mpimg
 
 # Helper function 
 
+import perspective_transform
+
 def find_lane_pixels(image):
     img = np.copy(image)
     # Take a histogram of the bottom half of the image
@@ -117,23 +119,37 @@ def fit_polynomial(image):
     out_img[righty, rightx] = [0, 0, 255]
 
     # Plots the left and right polynomials on the lane lines
-    plt.plot(left_fitx, ploty, color='yellow')
-    plt.plot(right_fitx, ploty, color='yellow')
+    #plt.plot(left_fitx, ploty, color='yellow')
+    #plt.plot(right_fitx, ploty, color='yellow')
 
     return out_img, left_fit, right_fit
 
 
 
 
-
-
-
-def fit_poly(img_shape,img):
+# def fit_poly(img_shape,img):
     
-    # Find our lane pixels first
-    leftx, lefty, rightx, righty,_ = find_lane_pixels(img)
+#     # Find our lane pixels first
+#     leftx, lefty, rightx, righty,_ = find_lane_pixels(img)
     
-    # Fit a second order polynomial to each with np.polyfit() ###
+#     # Fit a second order polynomial to each with np.polyfit() ###
+#     left_fit = np.polyfit(lefty, leftx, 2)
+#     right_fit = np.polyfit(righty, rightx, 2)
+    
+#     # Generate x and y values for plotting
+#     ploty = np.linspace(0, img_shape[0]-1, img_shape[0])
+    
+#     # Calc both polynomials using ploty, left_fit and right_fit ###
+#     left_fitx = left_fit[0]*ploty**2 + left_fit[1]*ploty + left_fit[2]
+#     right_fitx = right_fit[0]*ploty**2 + right_fit[1]*ploty + right_fit[2]
+    
+#     return left_fitx, right_fitx, ploty
+
+
+def fit_poly(img_shape, leftx, lefty, rightx, righty):
+    
+    img_shape = np.copy(img_shape)
+     # Fit a second order polynomial to each with np.polyfit() ###
     left_fit = np.polyfit(lefty, leftx, 2)
     right_fit = np.polyfit(righty, rightx, 2)
     
@@ -147,8 +163,14 @@ def fit_poly(img_shape,img):
     return left_fitx, right_fitx, ploty
 
 
+
+
 def search_around_poly(image):
+    
+    image = np.copy(image)
+    
     # HYPERPARAMETER
+
     margin = 100
 
     # Grab activated pixels
@@ -156,9 +178,10 @@ def search_around_poly(image):
     nonzeroy = np.array(nonzero[0])
     nonzerox = np.array(nonzero[1])
     
+    
     _,left_fit, right_fit = fit_polynomial(image)
     
-    
+        
     left_lane_inds = ((nonzerox > (left_fit[0]*(nonzeroy**2) + left_fit[1]*nonzeroy + 
                     left_fit[2] - margin)) & (nonzerox < (left_fit[0]*(nonzeroy**2) + 
                     left_fit[1]*nonzeroy + left_fit[2] + margin)))
@@ -173,16 +196,21 @@ def search_around_poly(image):
     righty = nonzeroy[right_lane_inds]
 
     # Fit new polynomials
-    left_fitx, right_fitx, ploty = fit_poly(image.shape,image)
+    left_fitx, right_fitx, ploty = fit_poly(image.shape, leftx, lefty, rightx, righty)
     
     ## Visualization ##
     # Create an image to draw on and an image to show the selection window
     out_img = np.dstack((image, image, image))*255
     window_img = np.zeros_like(out_img)
-    
     # Color in left and right line pixels
     out_img[nonzeroy[left_lane_inds], nonzerox[left_lane_inds]] = [255, 0, 0]
     out_img[nonzeroy[right_lane_inds], nonzerox[right_lane_inds]] = [0, 0, 255]
+    
+    
+     # This basically removes everything except the colored lane lines
+    lane_lines = out_img.copy()
+    lane_lines[lane_lines == 255] = 0
+    
 
     # Generate a polygon to illustrate the search window area
     # And recast the x and y points into usable format for cv2.fillPoly()
@@ -201,9 +229,21 @@ def search_around_poly(image):
     result = cv2.addWeighted(out_img, 1, window_img, 0.3, 0)
     
     # Plot the polynomial lines onto the image
-    plt.plot(left_fitx, ploty, color='yellow')
-    plt.plot(right_fitx, ploty, color='yellow')
+    #plt.plot(left_fitx, ploty, color='yellow')
+    #plt.plot(right_fitx, ploty, color='yellow')
     ## End visualization steps ##
     
-    return result,left_fitx, right_fitx, ploty
+    return result, left_fitx, right_fitx, ploty
+
+
+
+
+# Plot the polynomial lines onto the image
+def show_results(image):
+    top_down = np.copy(image)
+    
+    result, left_fitx, right_fitx, ploty = search_around_poly(top_down)    
+    plt.plot(left_fitx, ploty, color='yellow')
+    plt.plot(right_fitx, ploty, color='yellow')
+    plt.imshow(result)
 
