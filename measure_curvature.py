@@ -142,31 +142,3 @@ def get_color_zone_warp(top_down):
     
     return color_warp
 
-
-# def draw_lane_to_orinalImage(undist_image, binary_warped):
-#     top_down = np.copy(binary_warped)
-#     image = np.copy(undist_image)
-    
-#     _,left_fitx, right_fitx, ploty, lane_lines = detect_lane_pixels.search_around_poly(top_down)
-    
-#     # Prepare the x/y points for cv2.fillPoly()
-#     left_points = np.array([np.vstack([left_fitx, ploty]).T])
-#     right_points = np.array([np.flipud(np.vstack([right_fitx, ploty]).T)])
-#     points = np.hstack((left_points, right_points))
-    
-#     # Color the area between the lines (the lane)
-#     # Create a blank canvas to draw the lane on using lane_lines
-#     filled_lane = np.zeros_like(lane_lines)  
-#     cv2.fillPoly(filled_lane, np.int_([points]), (0, 255, 0))
-#     warped_lane_info = cv2.addWeighted(lane_lines, 1, filled_lane, .3, 0)
-    
-#     unwarped, Minv = perspective_transform.get_original_perspective(image)
-
-#     unwarped_lane_info = cv2.warpPerspective(warped_lane_info, Minv, (image.shape[1], image.shape[0]))
-#     original_img = cv2.addWeighted(image, 1, unwarped_lane_info, 1, 0)
-    
-#     original_img = add_text(original_img, top_down)
-        
-#     return original_img
-
-

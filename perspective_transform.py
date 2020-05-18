@@ -8,26 +8,62 @@ import matplotlib.image as mpimg
 
 
 
-# Pick four points in a trapezoidal on straight lines
-def get_trapezoid(image):
+# # Pick four points in a trapezoidal on straight lines
+# def get_trapezoid(image):
     
-    img = np.copy(image)
-    img_size = (img.shape[1], img.shape[0])
+#     img = np.copy(image)
+#     img_size = (img.shape[1], img.shape[0])
     
-    src = np.float32(
-    [[(img_size[0] / 2) - 55, img_size[1] / 2 + 100],
-    [((img_size[0] / 6) - 10), img_size[1]],
-    [(img_size[0] * 5 / 6) + 60, img_size[1]],
-    [(img_size[0] / 2 + 55), img_size[1] / 2 + 100]])
+#     src = np.float32(
+#     [[(img_size[0] / 2) - 55, img_size[1] / 2 + 100],
+#     [((img_size[0] / 6) - 10), img_size[1]],
+#     [(img_size[0] * 5 / 6) + 60, img_size[1]],
+#     [(img_size[0] / 2 + 55), img_size[1] / 2 + 100]])
     
-    dst = np.float32(
-    [[(img_size[0] / 4), 0],
-    [(img_size[0] / 4), img_size[1]],
-    [(img_size[0] * 3 / 4), img_size[1]],
-    [(img_size[0] * 3 / 4), 0]])
+#     dst = np.float32(
+#     [[(img_size[0] / 4), 0],
+#     [(img_size[0] / 4), img_size[1]],
+#     [(img_size[0] * 3 / 4), img_size[1]],
+#     [(img_size[0] * 3 / 4), 0]])
     
     
-    return src, dst
+#     return src, dst
+
+
+
+
+def get_trapezoid(img): #warp_to_lines(img)
+    ''' "img" should be an undistorted image. '''
+    
+    x_shape, y_shape = img.shape[1], img.shape[0]
+    middle_x = x_shape//2
+    top_y = 2*y_shape//3
+    top_margin = 93
+    bottom_margin = 450
+    points = [
+        (middle_x-top_margin, top_y),
+        (middle_x+top_margin, top_y),
+        (middle_x+bottom_margin, y_shape),
+        (middle_x-bottom_margin, y_shape)
+    ]
+
+
+    src = np.float32(points)
+    dst = np.float32([
+        (middle_x-bottom_margin, 0),
+        (middle_x+bottom_margin, 0),
+        (middle_x+bottom_margin, y_shape),
+        (middle_x-bottom_margin, y_shape)
+    ])
+        
+    return src,dst
+
+
+
+
+
+
+
 
 
 
